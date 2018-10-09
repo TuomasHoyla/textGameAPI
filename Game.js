@@ -24,7 +24,7 @@ const getLocation = (id) => {
 
   locationItemIds = location['itemIds']
 
-  location.locationItems = (location['itemIds'] && Object.keys(locationItemIds).length > 0) ? getItems(location['itemIds']) : {}
+  location.locationItems = (location['itemIds'] && Object.keys(locationItemIds).length > 0) ? getItems(location['itemIds']) : []
 
   return location
 }
@@ -33,13 +33,15 @@ const getItem = id => Items.find(item => item.id === id)
 const getItems = (ids) => ids.map(x => Items.find(item => item.id === x))
 const drawMap  = (currentLocation, visited, mapIn) => {
 
-  //let map = mapIn.slice(0)
   map = JSON.parse(JSON.stringify(mapIn));
 
   for (let x = 0; x < map.length; x++) {
+
     for (let y = 0; y < map[x].length; y++) {
       if (visited.includes(map[x][y])) {
-          map[x][y] = (currentLocation === map[x][y]) ? 'X' : '-'
+          map[x][y] = (currentLocation === map[x][y]) ? 'x' : '-'
+        } else {
+          map[x][y] = '*'
         }
       }
     }

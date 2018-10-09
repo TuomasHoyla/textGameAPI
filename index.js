@@ -15,7 +15,7 @@ app.use(bodyParser.json())
 let game = new Game()
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server runnink on port ${PORT}`)
 })
 
 app.get('/', function (req, res) {
