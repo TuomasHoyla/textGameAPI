@@ -1,22 +1,27 @@
 
 const Locations = require('./locations')
 const Items  = require('./items')
+const Protagonist = require('./protagonist')
+const tools = require('./ItemHandling/tools')
 
 function Game() {
   this.location = 1
-  this.itemIds = []
+  this.itemIds = [3]
   this.visited = [1]
 }
 
 Game.prototype.getState = function() {
 
     return {
+      'health' : getProtagonist().health,
       'location': getLocation(this.location),
       'inventory': getItems(this.itemIds),
       'map' : drawMap(this.location, this.visited, Locations.map),
       'message' : null,
     }
 }
+
+const getProtagonist = () => Protagonist
 
 const getLocation = (id) => {
 
@@ -84,6 +89,23 @@ Game.prototype.takeItem = function(itemId) {
   return this.getState()
 }
 
+Game.prototype.drinkItem = function(itemId) {
+
+  let index = this.itemIds.indexOf(itemId);
+
+  if (index > -1) {
+
+    let item = getItem(itemId)
+
+    changedState = tools.drinkItem(this.getState(), item, getProtagonist())
+
+    return changedState
+
+  } else {
+    return { ...this.getState(), message: 'No such item' }
+  }
+}
+
 Game.prototype.dropItem = function(itemId) {
 
   //todo messages
@@ -97,14 +119,12 @@ Game.prototype.dropItem = function(itemId) {
     //remove from hand
     this.itemIds.splice(index, 1);
 
-    const changedState = { ...this.getState(), message: 'You dropped ' + getItem(itemId).name } //also remove item
+    const changedState = { ...this.getState(), message: 'You dropped ' + getItem(itemId).name }
 
     return changedState
 
   } else {
-    const changedState = { ...this.getState(), message: 'No such item' }
-
-    return changedState
+    return { ...this.getState(), message: 'No such item' }
   }
 }
 
@@ -116,13 +136,11 @@ Game.prototype.moveTo = function(direction) {
 
     this.location = location.exitIds[direction]
 
-    //mark to map as visited locati
-    //! this.visited.includes(direction) &&
+    //mark as visited for map
     this.visited.push(this.location)
 
   } else {
-    const changedState = { ...this.getState(), message: 'You cannot go there' }
-    return changedState
+    return { ...this.getState(), message: 'You cannot go there'}
   }
 
   return this.getState()

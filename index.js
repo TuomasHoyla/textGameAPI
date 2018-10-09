@@ -51,3 +51,10 @@ app.get('/drop/:id', (req, res) => {
 
     res.json(game.dropItem(id))
 })
+
+app.get('/drink/:id', (req, res) => {
+
+  const id = Number(req.params.id)
+
+  res.json(game.drinkItem(id))
+})

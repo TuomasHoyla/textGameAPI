@@ -4,6 +4,8 @@ const axe = {
   text: 'One hand axe',
   'damage': 2,
   'isTakeable' : true,
+  'isActive' : true,
+  'isEdible' : false,
 }
 
 const torch = {
@@ -12,6 +14,8 @@ const torch = {
   text: 'It has been lit',
   'damage': null,
   'isTakeable' : true,
+  'isActive': true,
+  'isEdible' : false,
 }
 
 const flagon = {
@@ -20,6 +24,8 @@ const flagon = {
   text: 'It is full',
   'damage': null,
   'isTakeable' : true,
+  'isActive' : true,
+  'isEdible' : true,
 }
 
 const Items = [axe, torch, flagon]
