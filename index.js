@@ -7,7 +7,7 @@ const bodyParser = require('body-parser')
 const app = express()
 const cors = require('cors')
 
-const Game = require('./game')
+const Game = require('./Game')
 
 app.use(cors())
 app.use(bodyParser.json())
