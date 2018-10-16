@@ -18,6 +18,13 @@ app.listen(PORT, () => {
   console.log(`Server runnink on port ${PORT}`)
 })
 
+app.get('/reset', function(req, res) {
+
+  game = new Game()
+
+  res.json(game.getState())
+})
+
 app.get('/', function (req, res) {
   res.json(game.getState())
 })
