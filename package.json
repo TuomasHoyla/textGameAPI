@@ -1,7 +1,7 @@
 {
-  "name": "node-js-getting-started",
+  "name": "Game API",
   "version": "0.3.0",
-  "description": "A sample Node.js app using Express 4",
+  "description": "made with Node.js app using Express 4",
   "engines": {
     "node": "8.9.1"
   },
@@ -16,6 +16,7 @@
     "babel-core": "^6.26.3",
     "ejs": "^2.5.6",
     "express": "^4.15.2",
+    "forever": "^0.15.3",
     "node-hot-loader": "^1.12.1",
     "webpack": "^4.20.2"
   },
