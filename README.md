@@ -1,10 +1,10 @@
 # Adventure game engine & API
 
-##Getting started
+## Getting started
 npm install, npm run
 or, yarn start
 
-##Try it on
+## Try it on
 https://arcane-plateau-73839.herokuapp.com/
 
 commands include:
