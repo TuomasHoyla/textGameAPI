@@ -7,7 +7,7 @@ or, yarn start
 ## Try it on
 https://arcane-plateau-73839.herokuapp.com/
 
-commands include:
+## commands
 
 /n/ - move north
 
