@@ -28,6 +28,13 @@ const flagon = {
   'isEdible' : true,
 }
 
-const Items = [axe, torch, flagon]
+/*
+class Items {
 
-module.exports = Items
+  constructor() {
+    this.items = [axe, torch, flagon]
+  }
+}
+*/
+
+module.exports = [axe, torch, flagon]

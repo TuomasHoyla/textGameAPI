@@ -4,146 +4,127 @@ const Items  = require('./items')
 const Protagonist = require('./protagonist')
 const tools = require('./ItemHandling/tools')
 
-function Game() {
-  this.location = 1
-  this.itemIds = [3]
-  this.visited = [1]
-}
+class Game {
+  constructor() {
+    this.location = 1
+    this.itemIds = [3]
+    this.visited = [1]
+    this.protagonist = new Protagonist()
+    this.locations = new Locations()
+    this.items = Items.slice(0)
+  }
 
-Game.prototype.getState = function() {
-
+  getState() {
     return {
-      'health' : getProtagonist().health,
-      'location': getLocation(this.location),
-      'inventory': getItems(this.itemIds),
-      'map' : drawMap(this.location, this.visited, Locations.map),
-      'message' : null,
-    }
-}
+      health : this.protagonist.getHealth(),
+      location : this.getLocation(this.location),
+      visited : this.visited,
+      inventory : this.getItems(this.itemIds),
+      map : tools.drawMap(this.location, this.visited, this.locations.map),
+      message: null,
+    }}
 
-const getProtagonist = () => Protagonist
+  takeItem(itemId) {
 
-const getLocation = (id) => {
+    const locationItemIds = this.getState().location.itemIds
 
-  const location = Locations.rooms.find(location => location.id === id)
+    if (locationItemIds.includes(itemId)) {
 
-  locationItemIds = location['itemIds']
+      const currentLocationItemIds = this.getLocation(this.location).itemIds
 
-  location.locationItems = (location['itemIds'] && Object.keys(locationItemIds).length > 0) ? getItems(location['itemIds']) : []
+      const removableItemIndex = currentLocationItemIds.indexOf(itemId)
 
-  return location
-}
+      if (removableItemIndex > -1 ) {
+        //add to hand
+        this.itemIds.push(itemId)
+        //remove from ground
+        currentLocationItemIds.splice(removableItemIndex, 1)
 
-const getItem = id => Items.find(item => item.id === id)
-const getItems = (ids) => ids.map(x => Items.find(item => item.id === x))
-const drawMap  = (currentLocation, visited, mapIn) => {
+        const changedState = { ...this.getState(), message: 'You took ' + this.getItem(itemId).name }
 
-  map = JSON.parse(JSON.stringify(mapIn));
-
-  for (let x = 0; x < map.length; x++) {
-
-    for (let y = 0; y < map[x].length; y++) {
-      if (visited.includes(map[x][y])) {
-          map[x][y] = (currentLocation === map[x][y]) ? 'x' : '-'
-        } else {
-          map[x][y] = '*'
-        }
+        return changedState
       }
+    } else {
+
+        const changedState = { ...this.getState(), message: 'No such item' }
+
+        return changedState
+
     }
 
-    return map
-}
+    return this.getState()
+  }
 
-Game.prototype.setCurrentLocation = function(location) {
-  this.location = location
-};
+  dropItem(itemId) {
 
-Game.prototype.takeItem = function(itemId) {
+    //todo messages
+    let index = this.itemIds.indexOf(itemId);
 
-  const locationItemIds = this.getState().location.itemIds
+    if (index > -1) {
 
-  if (locationItemIds.includes(itemId)) {
+      //add to ground
+      this.getState().location.itemIds.push(itemId)
 
-    const currentLocationItemIds = getLocation(this.location).itemIds
+      //remove from hand
+      this.itemIds.splice(index, 1);
 
-    const removableItemIndex = currentLocationItemIds.indexOf(itemId)
-
-    if (removableItemIndex > -1 ) {
-      //add to hand
-      this.itemIds.push(itemId)
-      //remove from ground
-      currentLocationItemIds.splice(removableItemIndex, 1)
-
-      const changedState = { ...this.getState(), message: 'You took ' + getItem(itemId).name }
-
-      return changedState
-    }
-  } else {
-
-      const changedState = { ...this.getState(), message: 'No such item' }
+      const changedState = { ...this.getState(), message: 'You dropped ' + this.getItem(itemId).name }
 
       return changedState
 
+    } else {
+      return { ...this.getState(), message: 'No such item' }
+    }
   }
 
-  return this.getState()
-}
+  drinkItem(itemId) {
 
-Game.prototype.drinkItem = function(itemId) {
+    const index = this.itemIds.indexOf(itemId);
 
-  let index = this.itemIds.indexOf(itemId);
+    if (index > -1) {
 
-  if (index > -1) {
+      const item = this.getItem(itemId)
 
-    let item = getItem(itemId)
+      const changedState = tools.drinkItem(this.getState(), item, this.protagonist)
 
-    changedState = tools.drinkItem(this.getState(), item, getProtagonist())
+      return changedState
 
-    return changedState
-
-  } else {
-    return { ...this.getState(), message: 'No such item' }
-  }
-}
-
-Game.prototype.dropItem = function(itemId) {
-
-  //todo messages
-  let index = this.itemIds.indexOf(itemId);
-
-  if (index > -1) {
-
-    //add to ground
-    this.getState().location.itemIds.push(itemId)
-
-    //remove from hand
-    this.itemIds.splice(index, 1);
-
-    const changedState = { ...this.getState(), message: 'You dropped ' + getItem(itemId).name }
-
-    return changedState
-
-  } else {
-    return { ...this.getState(), message: 'No such item' }
-  }
-}
-
-Game.prototype.moveTo = function(direction) {
-
-  let location = Locations.rooms.find(location => location.id === this.location)
-
-  if (location && location.exitIds[direction] !== null) {
-
-    this.location = location.exitIds[direction]
-
-    //mark as visited for map
-    this.visited.push(this.location)
-
-  } else {
-    return { ...this.getState(), message: 'You cannot go there'}
+    } else {
+      return { ...this.getState(), message: 'No such item' }
+    }
   }
 
-  return this.getState()
+  getLocation(id) {
+
+    const location = this.locations.rooms.find(location => location.id === id)
+
+    let locationItemIds = location.itemIds
+
+    location.locationItems = (location['itemIds'] && Object.keys(locationItemIds).length > 0) ? this.getItems(location['itemIds']) : []
+
+    return location
+  }
+
+  moveTo(direction) {
+
+    let location = this.locations.rooms.find(location => location.id === this.location)
+
+    if (location && location.exitIds[direction] !== null) {
+
+      this.location = location.exitIds[direction]
+
+      //mark as visited for map
+      ! this.visited.includes(this.location) && this.visited.push(this.location)
+
+    } else {
+      return { ...this.getState(), message: 'You cannot go there'}
+    }
+
+    return this.getState()
+  }
+
+  getItem(id) { return this.items.find(item => item.id === id)}
+  getItems(ids) {return ids.map(x => this.items.find(item => item.id === x))}
 }
 
 module.exports = Game;

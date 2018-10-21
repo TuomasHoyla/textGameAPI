@@ -12,7 +12,7 @@ const Game = require('./Game')
 app.use(cors())
 app.use(bodyParser.json())
 
-let game = new Game()
+ let game = new Game()
 
 app.listen(PORT, () => {
   console.log(`Server runnink on port ${PORT}`)
@@ -20,7 +20,9 @@ app.listen(PORT, () => {
 
 app.get('/reset', function(req, res) {
 
+  delete game
   game = new Game()
+  game.reset()
 
   res.json(game.getState())
 })

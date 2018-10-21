@@ -38,9 +38,12 @@ const map =
   ['*', 1, '*'],
 ]
 
-const Locations = {
-  rooms : [entrance, entranceHall, hall, armory],
-  map: map,
+class Locations {
+
+  constructor() {
+    this.rooms = [entrance, entranceHall, hall, armory]
+    this.map = map
+  }
 }
 
 module.exports = Locations
