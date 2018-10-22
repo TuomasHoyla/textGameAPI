@@ -11,7 +11,7 @@ class Game {
     this.visited = [1]
     this.protagonist = new Protagonist()
     this.locations = new Locations()
-    this.items = Items.slice(0)
+    this.items = Items
   }
 
   getState() {
@@ -57,8 +57,7 @@ class Game {
 
   dropItem(itemId) {
 
-    //todo messages
-    let index = this.itemIds.indexOf(itemId);
+    const index = this.itemIds.indexOf(itemId);
 
     if (index > -1) {
 
@@ -94,17 +93,6 @@ class Game {
     }
   }
 
-  getLocation(id) {
-
-    const location = this.locations.rooms.find(location => location.id === id)
-
-    let locationItemIds = location.itemIds
-
-    location.locationItems = (location['itemIds'] && Object.keys(locationItemIds).length > 0) ? this.getItems(location['itemIds']) : []
-
-    return location
-  }
-
   moveTo(direction) {
 
     let location = this.locations.rooms.find(location => location.id === this.location)
@@ -123,8 +111,17 @@ class Game {
     return this.getState()
   }
 
+  getLocation(id) {
+
+    let location = this.locations.rooms.find(location => location.id === id)
+
+    location.locationItems = (location['itemIds'] && Object.keys(location.itemIds).length > 0) ? this.getItems(location['itemIds']) : []
+
+    return location
+  }
+
   getItem(id) { return this.items.find(item => item.id === id)}
-  getItems(ids) {return ids.map(x => this.items.find(item => item.id === x))}
+  getItems(ids) {return ids.map(id => this.getItem(id))}
 }
 
 module.exports = Game;

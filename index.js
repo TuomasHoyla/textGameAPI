@@ -20,11 +20,9 @@ app.listen(PORT, () => {
 
 app.get('/reset', function(req, res) {
 
-  delete game
   game = new Game()
-  game.reset()
 
-  res.json(game.getState())
+  res.json({ ...game.getState(), message: 'Shallow reset' })
 })
 
 app.get('/', function (req, res) {
