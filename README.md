@@ -1,5 +1,7 @@
 # Adventure game engine & API
 
+# Note! Update in progress! Does not work currently!
+
 ## Getting started
 npm install, npm run
 or, yarn start
@@ -22,4 +24,3 @@ https://arcane-plateau-73839.herokuapp.com/
 /drop/[itemId]
 
 /drink/[itemId]
-
