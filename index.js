@@ -6,31 +6,73 @@ const PORT = process.env.PORT || 5000
 const bodyParser = require('body-parser')
 const app = express()
 const cors = require('cors')
-
-const Game = require('./Game')
+const Items  = require('./items')
+const Locations = require('./locations')
 
 app.use(cors())
 app.use(bodyParser.json())
-
- let game = new Game()
 
 app.listen(PORT, () => {
   console.log(`Server runnink on port ${PORT}`)
 })
 
-app.get('/reset', function(req, res) {
 
-  game = new Game()
+const getItem = (id) => { return Items.find(item => item.id === id)}
+const getItems = (ids) => {return ids.map(id => getItem(id))}
+const getLocationItems = (itemIds) => {return itemIds && Object.keys(itemIds).length > 0 ? getItems(itemIds) : []}
+const getLocation = (id) => {
 
-  res.json({ ...game.getState(), message: 'Shallow reset' })
+      return {
+        room : Locations.rooms.find(location => location.id === id),
+        locationItems: getLocationItems(Locations.rooms.find(location => location.id === id).itemIds),
+      }
+}
+
+const View = (state) => ({
+    getSituation: () => {
+        return {
+          health: state.health,
+          stamina: state.stamina,
+          location: getLocation(state.locationId),
+          inventory: getItems(state.inventoryItemIds),
+          message : 'You are still.'
+        }
+    }
 })
 
+const canMove = (state) => ({
+    moveTo: (direction) => {
+        state.locationId = direction
+        return {...state, message : ('You move to: ' + direction)}
+    }
+})
+
+const protagonist = (name) => {
+
+  let state = {
+    name,
+    health: 100,
+    stamina: 100,
+    locationId: 1,
+    visited: [1],
+    inventoryItemIds: [1],
+    message: null,
+  }
+
+  return Object.assign(state, View(state), canMove(state));
+}
+
+indy = protagonist('Henkilö')
+
 app.get('/', function (req, res) {
-  res.json(game.getState())
+  res.json(indy.getSituation())
 })
 
 app.get('/n', (req, res) => {
-  return res.json(game.moveTo(0))
+
+  indy.moveTo(2)
+
+  return res.json(indy.getSituation())
 })
 
 app.get('/s', (req, res) => {

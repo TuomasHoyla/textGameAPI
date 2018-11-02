@@ -2,7 +2,7 @@ const entrance = {
   id: 1,
   name: 'Entrance',
   text: 'A huge wooden door. It seems to be open',
-  itemIds: [],
+  itemIds: [3],
   //        n   s     e      w
   exitIds: [2, null, null, null]
 }
@@ -38,12 +38,7 @@ const map =
   ['*', 1, '*'],
 ]
 
-class Locations {
-
-  constructor() {
-    this.rooms = [entrance, entranceHall, hall, armory]
-    this.map = map
-  }
+module.exports = {
+  rooms : [entrance, entranceHall, hall, armory],
+  map: map,
 }
-
-module.exports = Locations
