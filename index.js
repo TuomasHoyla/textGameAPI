@@ -8,42 +8,73 @@ const app = express()
 const cors = require('cors')
 const Items  = require('./items')
 const Locations = require('./locations')
+const tools = require('./ItemHandling/tools')
 
 app.use(cors())
 app.use(bodyParser.json())
 
 app.listen(PORT, () => {
-  console.log(`Server runnink on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`)
 })
-
 
 const getItem = (id) => { return Items.find(item => item.id === id)}
 const getItems = (ids) => {return ids.map(id => getItem(id))}
-const getLocationItems = (itemIds) => {return itemIds && Object.keys(itemIds).length > 0 ? getItems(itemIds) : []}
-const getLocation = (id) => {
+const getRoomItems = (itemIds) => {return itemIds && Object.keys(itemIds).length > 0 ? getItems(itemIds) : []}
+const getLocation = (state) => {
 
       return {
-        room : Locations.rooms.find(location => location.id === id),
-        locationItems: getLocationItems(Locations.rooms.find(location => location.id === id).itemIds),
+        room : state.locations.rooms.find(location => location.id === state.locationId),
+        roomItems: getRoomItems(state.locations.rooms.find(location => location.id === state.locationId).itemIds),
       }
+}
+
+const getView = (state) => {
+  return {
+    health: state.health,
+    stamina: state.stamina,
+    location: getLocation(state),
+    inventory: getItems(state.inventoryItemIds),
+    map : tools.drawMap(state.locationId, state.visited, Locations.map),
+    message : 'You are still.'
+  }
 }
 
 const View = (state) => ({
     getSituation: () => {
-        return {
-          health: state.health,
-          stamina: state.stamina,
-          location: getLocation(state.locationId),
-          inventory: getItems(state.inventoryItemIds),
-          message : 'You are still.'
-        }
-    }
+        return getView(state)
+      }
 })
 
-const canMove = (state) => ({
+const actions = (state) => ({
     moveTo: (direction) => {
-        state.locationId = direction
-        return {...state, message : ('You move to: ' + direction)}
+
+      const location = getLocation(state).room
+
+      if (location && location.exitIds[direction] !== null) {
+
+        state.locationId = location.exitIds[direction]
+
+        //mark as visited for map
+        ! state.visited.includes(location) && state.visited.push(state.locationId)
+
+        return {...getView(state), message : ('You enter to ' + getLocation(state).room.name)}
+
+      }
+      return { ...getView(state), message: 'You cannot go there'}
+    },
+    takeItem: (itemId) => {
+
+      if (getLocation(state).roomItems.includes(getItem(itemId)) && getItem(itemId).isTakeable) {
+          //pick up
+          state.inventoryItemIds.push(itemId)
+          //remove from ground
+          const index = getLocation(state).room.itemIds.indexOf(itemId);
+          if (index > -1) {
+            getLocation(state).room.itemIds.splice(index, 1);
+          }
+          return { ...getView(state), message: 'You took ' + getItem(itemId).name }
+      }
+      return {...getView(state), message: 'no such item' }
     }
 })
 
@@ -57,9 +88,11 @@ const protagonist = (name) => {
     visited: [1],
     inventoryItemIds: [1],
     message: null,
+    locations: Locations,
+    items: Items,
   }
 
-  return Object.assign(state, View(state), canMove(state));
+  return Object.assign(state, View(state), actions(state));
 }
 
 indy = protagonist('Henkilö')
@@ -69,41 +102,38 @@ app.get('/', function (req, res) {
 })
 
 app.get('/n', (req, res) => {
-
-  indy.moveTo(2)
-
-  return res.json(indy.getSituation())
+  return res.json(indy.moveTo(0))
 })
 
 app.get('/s', (req, res) => {
-  return res.json(game.moveTo(1))
+  return res.json(indy.moveTo(1))
 })
 
 app.get('/e', (req, res) => {
-  return res.json(game.moveTo(2))
+  return res.json(indy.moveTo(2))
 })
 
 app.get('/w', (req, res) => {
-  return res.json(game.moveTo(3))
+  return res.json(indy.moveTo(3))
 })
 
 app.get('/take/:id', (req, res) => {
 
   const id = Number(req.params.id)
 
-  res.json(game.takeItem(id))
+  res.json(indy.takeItem(id))
 })
 
 app.get('/drop/:id', (req, res) => {
 
   const id = Number(req.params.id)
 
-    res.json(game.dropItem(id))
+    res.json(indy.dropItem(id))
 })
 
 app.get('/drink/:id', (req, res) => {
 
   const id = Number(req.params.id)
 
-  res.json(game.drinkItem(id))
+  res.json(indy.drinkItem(id))
 })
