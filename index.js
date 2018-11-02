@@ -117,9 +117,38 @@ const actions = (state) => ({
       state.health = 100
 
       return { ...getView(state), message: 'You consume ' + item.name}
-  }
-  return { ...getView(state), message: 'No such item' }
-}
+    }
+    return { ...getView(state), message: 'No such item' }
+  },
+
+  resetState: () => {
+
+    state.health = 50
+    state.stamina = 100
+    state.locationId = 1
+    state.visited = [1]
+    state.inventoryItemIds = [3]
+    state.message = 'reset happened'
+    state.locations = Locations
+    state.items = Items
+
+    return { ...getView(state), message: 'Reset.' }
+  },
+/*
+  resetState: () => {
+    state.health = 50,
+    state.stamina = 100,
+    state.locationId = 1,
+    state.visited = [1],
+    state.inventoryItemIds = [3],
+    state.message = 'reset happened',
+    state.locations = Locations,
+    state.items = Items,
+
+  //  return getView(state)
+  },
+  */
+
 })
 
 const protagonist = (name) => {
@@ -180,4 +209,8 @@ app.get('/drink/:id', (req, res) => {
   const id = Number(req.params.id)
 
   res.json(indy.drinkItem(id))
+})
+
+app.get('/reset', function (req, res) {
+  res.json(indy.resetState())
 })
