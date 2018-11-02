@@ -17,7 +17,7 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
-const getItem = (id) => { return Items.find(item => item.id === id)}
+const getItem = (id) => { return Items.find(item => item.id === id)} //todo use state.items instead
 const getItems = (ids) => {return ids.map(id => getItem(id))}
 const getRoomItems = (itemIds) => {return itemIds && Object.keys(itemIds).length > 0 ? getItems(itemIds) : []}
 const getLocation = (state) => {
@@ -62,31 +62,75 @@ const actions = (state) => ({
       }
       return { ...getView(state), message: 'You cannot go there'}
     },
+
     takeItem: (itemId) => {
 
       if (getLocation(state).roomItems.includes(getItem(itemId)) && getItem(itemId).isTakeable) {
+
           //pick up
           state.inventoryItemIds.push(itemId)
-          //remove from ground
-          const index = getLocation(state).room.itemIds.indexOf(itemId);
+
+          const index = getLocation(state).room.itemIds.indexOf(itemId)
+
           if (index > -1) {
-            getLocation(state).room.itemIds.splice(index, 1);
+            //remove from ground
+            getLocation(state).room.itemIds.splice(index, 1)
           }
+
           return { ...getView(state), message: 'You took ' + getItem(itemId).name }
       }
       return {...getView(state), message: 'no such item' }
+    },
+
+    dropItem: (itemId) => {
+
+      const index = state.inventoryItemIds.indexOf(itemId);
+
+      if (index > -1) {
+
+      //add to ground
+      getLocation(state).room.itemIds.push(itemId)
+
+      //remove from hand
+      state.inventoryItemIds.splice(index, 1)
+
+      return { ...getView(state), message: 'You dropped ' + getItem(itemId).name }
     }
+    return { ...getView(state), message: 'No such item' }
+  },
+
+  drinkItem: (itemId) => {
+
+    const index = state.inventoryItemIds.indexOf(itemId)
+
+    if (index > -1) {
+      const item = getItem(itemId)
+
+      if (item.isEdible === false) {
+        return { ...getView(state), message: 'You might not want to drink that' }
+      } else if (item.isActive === false) {
+        return { ...getView(state), message: 'You try to squeeze a drop, but nope'}
+      }
+
+      item.isActive = false
+      item.text = 'It is empty'
+      state.health = 100
+
+      return { ...getView(state), message: 'You consume ' + item.name}
+  }
+  return { ...getView(state), message: 'No such item' }
+}
 })
 
 const protagonist = (name) => {
 
   let state = {
     name,
-    health: 100,
+    health: 50,
     stamina: 100,
     locationId: 1,
     visited: [1],
-    inventoryItemIds: [1],
+    inventoryItemIds: [3],
     message: null,
     locations: Locations,
     items: Items,

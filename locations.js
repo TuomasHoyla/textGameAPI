@@ -2,7 +2,7 @@ const entrance = {
   id: 1,
   name: 'Entrance',
   text: 'A huge wooden door. It seems to be open',
-  itemIds: [2, 3],
+  itemIds: [],
   //        n   s     e      w
   exitIds: [2, null, null, null]
 }
