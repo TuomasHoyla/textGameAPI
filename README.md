@@ -1,6 +1,6 @@
 # Adventure game engine & API
 
-# Note! Update in progress! Does not work currently!
+# Note! Update in progress. Works now though.
 
 ## Getting started
 npm install, npm run
