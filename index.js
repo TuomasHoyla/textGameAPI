@@ -17,6 +17,20 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
+const initialState = (name) => {
+  return {
+    name: name ? name : 'Player 1',
+    health: 50,
+    stamina: 100,
+    locationId: 1,
+    visited: [1],
+    inventoryItemIds: [3],
+    message: null,
+    locations: Locations,
+    items: Items,
+  }
+}
+
 const getItem = (id) => { return Items.find(item => item.id === id)} //todo use state.items instead
 const getItems = (ids) => {return ids.map(id => getItem(id))}
 const getRoomItems = (itemIds) => {return itemIds && Object.keys(itemIds).length > 0 ? getItems(itemIds) : []}
@@ -30,6 +44,7 @@ const getLocation = (state) => {
 
 const getView = (state) => {
   return {
+    name: state.name,
     health: state.health,
     stamina: state.stamina,
     location: getLocation(state),
@@ -45,7 +60,7 @@ const View = (state) => ({
       }
 })
 
-const actions = (state) => ({
+const Actions = (state) => ({
     moveTo: (direction) => {
 
       const location = getLocation(state).room
@@ -123,52 +138,20 @@ const actions = (state) => ({
 
   resetState: () => {
 
-    state.health = 50
-    state.stamina = 100
-    state.locationId = 1
-    state.visited = [1]
-    state.inventoryItemIds = [3]
-    state.message = 'reset happened'
-    state.locations = Locations
-    state.items = Items
+    state = initialState()
 
     return { ...getView(state), message: 'Reset.' }
   },
-/*
-  resetState: () => {
-    state.health = 50,
-    state.stamina = 100,
-    state.locationId = 1,
-    state.visited = [1],
-    state.inventoryItemIds = [3],
-    state.message = 'reset happened',
-    state.locations = Locations,
-    state.items = Items,
-
-  //  return getView(state)
-  },
-  */
-
 })
 
-const protagonist = (name) => {
+const game = (playerName) => {
 
-  let state = {
-    name,
-    health: 50,
-    stamina: 100,
-    locationId: 1,
-    visited: [1],
-    inventoryItemIds: [3],
-    message: null,
-    locations: Locations,
-    items: Items,
-  }
+  let state = initialState(playerName)
 
-  return Object.assign(state, View(state), actions(state));
+  return {...state, ...View(state), ...Actions(state)}
 }
 
-indy = protagonist('Henkilö')
+indy = game('Henkilö')
 
 app.get('/', function (req, res) {
   res.json(indy.getSituation())
