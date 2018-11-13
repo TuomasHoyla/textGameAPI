@@ -1,7 +1,5 @@
 # Adventure game engine & API
 
-# Note! Update in progress. Works now though.
-
 ## Getting started
 npm install, npm run
 or, yarn start
